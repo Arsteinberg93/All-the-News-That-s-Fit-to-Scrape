@@ -1,5 +1,5 @@
 var express = require("express");
-var app = express();
+var router = express.Router();
 var path = require("path");
 
 var request = require("request");
@@ -8,11 +8,11 @@ var cheerio = require("cheerio");
 var Comment = require("../models/comment.js");
 var Article = require("../models/article.js");
 
-app.get("/", function(req, res) {
+router.get("/", function(req, res) {
     res.redirect("/articles");
 })
 
-app.get("/scrape", function(req, res) {
+router.get("/scrape", function(req, res) {
     request("https://www.nytimes.com", function(error, response, html) {
 
         var $ = cheerio.load(html);
@@ -20,7 +20,7 @@ app.get("/scrape", function(req, res) {
         // An empty array to save the data that we'll scrape
         var titlesArray = [];
 
-        $("article").each(function(i, element) {
+        $("li.css-ye6x8s").each(function(i, element) {
 
             var result = {};
 
@@ -54,8 +54,29 @@ app.get("/scrape", function(req, res) {
 
         });
         res.redirect("/");
+    });
+});
+
+router.get("/articles", function(req, res) {
+    Article.find().sort({ _id: -1 }).exec(function(err, doc) {
+        if (err) {
+            console.log(err);
+        } else {
+            var artcl = { article: doc };
+            res.render("index", artcl);
+        }
 
     });
-
-
 });
+
+router.get("/articles-json", function(req, res) {
+    Article.find({}, function(err, doc) {
+        if (err) {
+            console.log(err);
+        } else {
+            res.json(doc);
+        }
+    });
+});
+
+module.exports = router;
