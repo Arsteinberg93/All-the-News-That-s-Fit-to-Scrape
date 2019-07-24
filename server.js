@@ -6,9 +6,6 @@ mongoose.set('useCreateIndex', true);
 
 var express = require("express")
 
-var axios = require("axios");
-var cheerio = require("cheerio");
-
 var PORT = 3000;
 
 // Initialize Express
@@ -22,8 +19,6 @@ app.use(
         extended: false
     })
 );
-
-app.use(express.static(process.cwd() + "/public"));
 
 var exphbs = require("express-handlebars");
 app.engine("handlebars", exphbs({ defaultLayout: "main" }));
@@ -40,3 +35,5 @@ var db = mongoose.connection;
 app.listen(PORT, function() {
     console.log("App running on port " + PORT + "!");
 });
+
+module.exports = app;
