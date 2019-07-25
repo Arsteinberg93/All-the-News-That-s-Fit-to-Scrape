@@ -2,7 +2,7 @@ var express = require("express");
 var router = express.Router();
 
 
-var request = require("request");
+var request = require("axios");
 var cheerio = require("cheerio");
 
 var Comment = require("../models/comment.js");
@@ -13,9 +13,9 @@ router.get("/", function(req, res) {
 })
 
 router.get("/scrape", function(req, res) {
-    request("http://www.theverge.com", function(error, response, html) {
-
-        var $ = cheerio.load(html);
+    request("http://www.theverge.com").then(function(response) {
+        console.log(response);
+        var $ = cheerio.load(response.data);
 
         // An empty array to save the data that we'll scrape
         var titlesArray = [];
@@ -25,9 +25,10 @@ router.get("/scrape", function(req, res) {
             var result = {};
 
             result.title = $(this).children("a").text();
+            result.summary = $(this).children("a").text();
             result.link = $(this).children("a").attr("href");
 
-            if (result.title !== "" && result.link !== "") {
+            if (result.title !== "" && result.summary !== "" && result.link !== "") {
                 if (titlesArray.indexOf(result.title) == -1) {
                     titlesArray.push(result.title);
 
@@ -35,7 +36,7 @@ router.get("/scrape", function(req, res) {
                         if (test === 0) {
                             var entry = new Article(result);
 
-                            empty.save(function(err, doc) {
+                            entry.save(function(err, doc) {
                                 if (err) {
                                     console.log(err);
                                 } else {
@@ -57,14 +58,17 @@ router.get("/scrape", function(req, res) {
     });
 });
 
+
 router.get("/articles", function(req, res) {
     Article.find().sort({ _id: -1 }).exec(function(err, doc) {
         if (err) {
             console.log(err);
         } else {
             var artcl = { article: doc };
+            console.log(artcl)
             res.render("index", artcl);
         }
+
 
     });
 });
@@ -97,16 +101,16 @@ router.get("/readArticle/:id", function(req, res) {
         body: []
     };
 
-    Article.findOne({ _id: articleId }).populate("comment").exec(function(err, doc) {
+    Article.findOne({ _id: articleId }).populate("comment").then(function(doc) {
         if (err) {
             console.log(err);
         } else {
             hbsObj.article = doc;
             var link = doc.link;
-            request(link, function(error, response, html) {
-                var $ = cheerio.load(html);
+            request(link, function(response) {
+                var $ = cheerio.load(response);
 
-                $(".l-col_main").each(function(error, response, html) {
+                $(".l-col_main").each(function(response) {
                     hbsObj.body = $(this).children(".c-entry-content").children("p").text();
 
                     res.render("article", hbsObj);
@@ -148,4 +152,4 @@ router.post("/comment/:id", function(req, res) {
 });
 
 
-module.exports = router
+module.exports = router;
