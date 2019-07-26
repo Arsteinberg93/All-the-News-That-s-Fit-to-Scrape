@@ -31,6 +31,11 @@ app.set("view engine", "handlebars");
 mongoose.connect("mongodb://localhost:27017/scrapedDB", { useNewUrlParser: true });
 var db = mongoose.connection;
 
+var MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost/mongoHeadlines";
+
+mongoose.connect(MONGODB_URI);
+
+
 app.use(route);
 
 
