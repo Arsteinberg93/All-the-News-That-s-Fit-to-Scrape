@@ -5,7 +5,7 @@ var router = express.Router();
 var request = require("axios");
 var cheerio = require("cheerio");
 
-var Comment = require("../models/comment.js");
+// var Comment = require("../models/comment.js");
 var Article = require("../models/article.js");
 
 router.get("/", function(req, res) {
