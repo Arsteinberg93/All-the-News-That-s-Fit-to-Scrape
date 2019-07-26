@@ -28,9 +28,11 @@ app.engine("handlebars", exphbs({ defaultLayout: "main" }));
 
 app.set("view engine", "handlebars");
 
-mongoose.connect("mongodb://localhost:27017/scrapedDB", { useNewUrlParser: true });
-var db = mongoose.connection;
+var MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost/scrapedDB";
 
+mongoose.connect(MONGODB_URI, {
+    useNewUrlParser: true
+});
 
 
 app.use(route);
